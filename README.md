@@ -3,7 +3,7 @@
 ## Mini Ecommerce App
 
 ### Api Documentation:
-https://ecommerce-express-server-seven.vercel.app/docs
+https://freshcart-api-f45p.onrender.com/docs/
 
 
 ### Live preview:

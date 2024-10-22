@@ -15,13 +15,13 @@ const options = {
             version: '1.0.0',
         },
         servers: [
+            // {
+            // url: "http://localhost:5000/",
+            // description: "Local server"
+            // },
             {
-            url: "http://localhost:5000/",
-            description: "Local server"
-            },
-            {
-            url: "https://ecommerce-express-server-seven.vercel.app/",
-            description: "Live server"
+                url: "https://freshcart-api-f45p.onrender.com/",
+                description: "Live server"
             },
         ]
     },
