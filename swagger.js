@@ -20,7 +20,7 @@ const options = {
             // description: "Local server"
             // },
             {
-                url: "https://freshcart-api-f45p.onrender.com/",
+                url: "https://freshcart-api-6ivr.onrender.com/",
                 description: "Live server"
             },
         ]

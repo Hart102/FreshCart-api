@@ -3,7 +3,7 @@
 ## Mini Ecommerce App
 
 ### Api Documentation:
-https://freshcart-api-f45p.onrender.com/docs/
+https://freshcart-api-6ivr.onrender.com/docs/
 
 
 ### Live preview:
