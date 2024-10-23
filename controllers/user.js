@@ -45,9 +45,9 @@ const userLogin = async (req, res) => {
             return res.status(400).json({ isError: true, message: "Incorrect email or password!"})
         }
 
-        const token = jwt.sign({_id: user._id}, process.env.ACCESS_TOKEN, {expiresIn: "24h"})
+        const token = jwt.sign({_id: user._id, email: user.email}, process.env.ACCESS_TOKEN, {expiresIn: "24h"})
         req.user = token
-        res.json({ isError: false, message: "Login Successful!", access_token: token})
+        res.json({ isError: false, message: "Login Successful!", user_role: user.user_role, payload: token })
 
     } catch (error) {
         res.json({isError: true, message: "Internal server error"})
