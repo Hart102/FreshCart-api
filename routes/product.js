@@ -72,11 +72,11 @@ router.get("/:id", product.getProductById)
  */
 router.get("/category/:name", product.getProductsByCategory)
 
-/** PUT Methods */
+/** POST Methods */
 /**
  * @openapi
  * '/api/product/create':
- *  put:
+ *  post:
  *     tags:
  *     - Product Controller
  *     summary: Upload product images and create a product
@@ -114,14 +114,14 @@ router.get("/category/:name", product.getProductsByCategory)
  *       500:
  *         description: Internal server error
  */
-router.put("/create", Jwt, FileReader, product.createProduct)
+router.post("/create", Jwt, FileReader, product.createProduct)
 
 
-/** PUT Methods */
+/** POST Methods */
 /**
  * @openapi
  * '/api/product/edit/{id}':
- *  put:
+ *  post:
  *     tags:
  *     - Product Controller
  *     summary: Update a product and optionally replace images
@@ -168,7 +168,7 @@ router.put("/create", Jwt, FileReader, product.createProduct)
  *       500:
  *         description: Server error
  */
-router.patch("/edit/:id", FileReader, product.editProduct)
+router.post("/edit/:id", Jwt, FileReader, product.editProduct)
 
 
 /** DELETE Methods */

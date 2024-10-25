@@ -20,7 +20,7 @@ const productSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['available', 'unavailable'],
+    enum: ['available', 'out of stock'],
     default: 'available',
   },
   images: {

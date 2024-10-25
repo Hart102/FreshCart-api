@@ -79,6 +79,22 @@ router.put("/register", User.userRegistration)
  */
 router.post("/login", User.userLogin)
 
+/** POST Methods */
+/**
+ * @openapi
+ * '/api/user/logout':
+ *  post:
+ *     tags:
+ *     - User Controller
+ *     summary: User Logout
+ *     requestBody:
+ *      required: false
+ *      200:
+ *        description: Successful
+ *      500:
+ *        description: Server Error
+ */
+router.post("/logout", User.userLogout)
 
 /** PATCH Method */
 /**

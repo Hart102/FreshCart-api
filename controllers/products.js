@@ -8,13 +8,13 @@ const  categorySchema = require("../modals/category")
 const createProduct = async (req, res) => {
     try {
         if (!req.files || req.files.length === 0) {
-            return res.status(400).json({ isError: true, message: "No image uploaded!" });
+            return res.json({ isError: true, message: "No image uploaded!" });
         }
         const allowedImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
 
         for (const file of req.files) {
             if (!allowedImageTypes.includes(file.mimetype)) {
-                return res.status(400).json({ isError: true, message: "Invalid image type! Only JPEG, PNG, and JPG are allowed." });
+                return res.json({ isError: true, message: "Invalid image type! Only JPEG, PNG, and JPG are allowed." });
             }
         }
         const uploadedFiles = await FileUploader(req.files)
@@ -23,7 +23,7 @@ const createProduct = async (req, res) => {
             const {name, price, description, quantity, status, category_id} = req.body
             const product = new productSchema.product({
                 name,
-                price,
+                price: `NGN ${price}`,
                 description,
                 quantity,
                 status,
@@ -53,20 +53,18 @@ const editProduct = async (req, res) => {
 
             for (const file of req.files) {
                 if (!allowedImageTypes.includes(file.mimetype)) {
-                    return res.status(400).json({ isError: true, message: "Invalid image type! Only JPEG, PNG, and JPG are allowed." });
+                    return res.json({ isError: true, message: "Invalid image type! Only JPEG, PNG, and JPG are allowed." });
                 }
             }
+
             const images = JSON.parse(req.body.images)
             const replacedImageIds = JSON.parse(req.body.replacedImageIds)
-
-            // const images = req.body.images
-            // const replacedImageIds = req.body.replacedImageIds
 
             let deleteCount = 0
             for(const fileId of replacedImageIds){
                 //Delete old files
-                deleteCount++
                 await storage.deleteFile(process.env.APPWRITE_BUCKET_ID, fileId);
+                deleteCount++
 
                 //upload and replace old images
                 if(deleteCount == replacedImageIds.length){
@@ -84,16 +82,16 @@ const editProduct = async (req, res) => {
                         const product = await productSchema.product.findOneAndUpdate(new mongoose.Types.ObjectId(id),
                         {
                             name,
-                            price,
+                            price: `NGN${price}`,
                             description,
                             quantity,
                             status,
                             images: replaceOldImages(),
-                            category_id
+                            category_id: new mongoose.Types.ObjectId(category_id)
                         }, { new: true })
 
                         if(product){
-                            res.status(200).json({ isError: false, message: "Product updated successfully", payload: product })
+                            res.json({ isError: false, message: "Product updated successfully", payload: product })
                         }
                     }
                 }
@@ -103,19 +101,19 @@ const editProduct = async (req, res) => {
             const product = await productSchema.product.findOneAndUpdate(new mongoose.Types.ObjectId(id),
             {
                 name,
-                price,
+                price: `NGN${price}`,
                 description,
                 quantity,
                 status,
-                category_id
+                category_id: new mongoose.Types.ObjectId(category_id)
             }, { new: true })
 
             if(product){
-                res.status(200).json({ isError: false, message: "Product updated successfully", payload: product })
+                res.json({ isError: false, message: "Product updated successfully", payload: product })
             }
         }
     } catch (error) {
-        res.status(500).json({ isError: true, message: "Internal server error" })
+        res.json({ isError: true, message: "Internal server error" })
     }
 }
 
@@ -150,10 +148,10 @@ const getAllProducts = async (req, res) => {
             { $sort: { createdAt: -1 } }
         ])
         if(result){
-            res.status(200).json({ isError: false, message: "Products fetched successfully", payload: result })
+            res.json({ isError: false, message: "Products fetched successfully", payload: result })
         }
     } catch (error) {
-        res.status(500).json({ isError: true, message: "Internal server error" })
+        res.json({ isError: true, message: "Internal server error" })
     }
 }
 
@@ -243,12 +241,12 @@ const getProductsByCategory = async (req, res) => {
         },
       ]);
 
-      res.status(200).json({ isError: false, message: '', payload: result });
+      res.json({ isError: false, message: '', payload: result });
     } else {
-      res.status(404).json({ isError: true, message: 'No category found with the specified name' });
+      res.json({ isError: true, message: 'No category found with the specified name' });
     }
   } catch (error) {
-    res.status(500).json({ isError: true, message: 'Internal server error' });
+    res.json({ isError: true, message: 'Internal server error' });
   }
 };
 
@@ -259,7 +257,7 @@ const deleteProduct = async (req, res) => {
         // Delete all images associated with the product
         const product = await productSchema.product.findById(new mongoose.Types.ObjectId(id))
         if(!product){
-            return res.status(404).json({ isError: true, message: "Product not found" })
+            return res.json({ isError: true, message: "Product not found" })
         }
 
         let deleteCount = 0
@@ -280,6 +278,7 @@ const deleteProduct = async (req, res) => {
             }
         }
     } catch (error) {
+        console.log(error.message)
         res.json({ isError: true, message: "Internal server error" })
     }
 }

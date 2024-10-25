@@ -9,7 +9,7 @@ const userRegistration = async (req, res) => {
     try {
         const {error, value} = userSchema.validateRegistrationForm(req.body)
         if(error){
-            return res.status(400).json({isError: true, message: error.details[0].message.replace(/"/g, "")})
+            return res.json({isError: true, message: error.details[0].message.replace(/"/g, "")})
         }
         const hashedPassword = await bcrypt.hash(value.password, salt)
 
@@ -21,7 +21,7 @@ const userRegistration = async (req, res) => {
         })
 
         await user.save()
-        res.status(200).json({ isError: false, message: "User Registration Successful!", payload: user})
+        res.json({ isError: false, message: "User Registration Successful!", payload: user})
 
     } catch (error) {
         res.json({isError: true, message: "Internal server error"})
@@ -32,25 +32,35 @@ const userLogin = async (req, res) => {
     try {
         const {error, value} = userSchema.validateLoginForm(req.body)
         if(error){
-            return res.status(400).json({isError: true, message: error.details[0].message.replace(/"/g, "")})
+            return res.json({isError: true, message: error.details[0].message.replace(/"/g, "")})
         }
         const user = await userSchema.User.findOne({email: value.email})
 
         if(!user){
-            return res.status(400).json({ isError: true, message: "User not found!"})
+            return res.json({ isError: true, message: "User not found!"})
         }
         const isMatch = await bcrypt.compare(value.password, user.password)
 
         if(!isMatch){
-            return res.status(400).json({ isError: true, message: "Incorrect email or password!"})
+            return res.json({ isError: true, message: "Incorrect email or password!"})
         }
 
         const token = jwt.sign({_id: user._id}, process.env.ACCESS_TOKEN, {expiresIn: "24h"})
         req.user = token
-        res.json({ isError: false, message: "Login Successful!", access_token: token})
+        res.json({ isError: false, message: "Login Successful!", user_role: user.user_role, payload: token })
 
     } catch (error) {
         res.json({isError: true, message: "Internal server error"})
+    }
+}
+
+
+const  userLogout = async (req, res) => {
+    try {
+        res.clearCookie('token');
+        res.json({ isError: false, message: "Successful" })
+    } catch (error) {
+        res.json({ isError: true, message: "Internal server error" })  
     }
 }
 
@@ -59,7 +69,7 @@ const updateProfile = async(req, res) => {
     try {
         const {error, value} = userSchema.validateUpdateForm(req.body)
         if(error){
-            return res.status(400).json({ isError: true, message: error.details[0].message.replace(/"/g, "")})
+            return res.json({ isError: true, message: error.details[0].message.replace(/"/g, "")})
         }
 
         const emailInUseByAnotherUser = await userSchema.User.findOne({ 
@@ -68,7 +78,7 @@ const updateProfile = async(req, res) => {
         });
         
         if (emailInUseByAnotherUser) {
-            return res.status(400).json({ isError: true, message: 'Email already in use!' });
+            return res.json({ isError: true, message: 'Email already in use!' });
         }
 
         const user = await userSchema.User.findOneAndUpdate({
@@ -90,7 +100,7 @@ const getUserProfile = async (req, res) => {
         if(req.user){
             const user = await userSchema.User.findById(req.user._id)
             if(!user){
-                return res.status(404).json({ isError: true, message: "User not found!"})
+                return res.json({ isError: true, message: "User not found!"})
             }
             res.json({ isError: false, message: "", payload: user})
         }
@@ -103,16 +113,16 @@ const createAddress = async (req, res) => {
     try {
         const {error, value} = userSchema.validateAddressForm(req.body)
         if(error){
-            return res.status(400).json({ isError: true, message: error.details[0].message.replace(/"/g, "")})
+            return res.json({ isError: true, message: error.details[0].message.replace(/"/g, "")})
         }
         const response = await userSchema.User.findById(req.user._id);
 
         if (!response) {
-            return res.status(404).json({ isError: true, message: "User not found!" });
+            return res.json({ isError: true, message: "User not found!" });
         }
 
         if (response.addresses.length == 2) {
-            return res.status(400).json({ isError: true, message: "You cannot add more than two addresses." });
+            return res.json({ isError: true, message: "You cannot add more than two addresses." });
         }
         const user = await userSchema.User.findByIdAndUpdate(
             { _id: new mongoose.Types.ObjectId(req.user._id) },
@@ -154,8 +164,12 @@ const deleteAddress = async (req, res) => {
 module.exports = {
     userRegistration,
     userLogin,
+    userLogout,
     updateProfile,
     getUserProfile,
     createAddress,
     deleteAddress
 }
+
+
+

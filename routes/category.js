@@ -45,14 +45,14 @@ router.get("/", category.getAllCategories)
  *       500:
  *         description: Internal server error
  */
-router.put("/create", category.createCategory)
+router.post("/create", category.createCategory)
 
 
-/** PUT Methods */
+/** POST Methods */
 /**
  * @openapi
  * '/api/category/edit/{id}':
- *  put:
+ *  post:
  *     tags:
  *     - Category Controller
  *     summary: Update an existing category
@@ -79,7 +79,7 @@ router.put("/create", category.createCategory)
  *       500:
  *         description: Internal server error
  */
-router.patch("/edit/:id", category.editCategory)
+router.post("/edit/:id", category.editCategory)
 
 
 /** DELETE Methods */

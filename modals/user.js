@@ -53,6 +53,7 @@ const validateAddressForm = (form) => {
     city: joi.string().required(),
     state: joi.string().required(),
     country: joi.string().required(),
+    zipcode: joi.string().required(),
     phone: joi.string().required(),
   });
   return schema.validate(form);
@@ -60,4 +61,10 @@ const validateAddressForm = (form) => {
 
 const User = mongoose.model("users", user);
 
-module.exports = {User, validateRegistrationForm, validateLoginForm, validateUpdateForm, validateAddressForm}
+module.exports = {
+  User,
+  validateRegistrationForm,
+  validateLoginForm,
+  validateUpdateForm,
+  validateAddressForm
+}
