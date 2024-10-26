@@ -2,6 +2,11 @@ const mongoose = require("mongoose")
 const productSchema = require("../modals/product")
 const cartSchema = require("../modals/cart")
 
+const getTotalItemsInCart = async (userId) => {
+    const totalItemsInCart = await cartSchema.cart.findOne({ user_id: new mongoose.Types.ObjectId(userId) })
+    return totalItemsInCart.products.length
+}
+
 const addtoCart = async (req, res) => {
     try {
         const { product_id, quantity } = req.body
@@ -25,7 +30,8 @@ const addtoCart = async (req, res) => {
                 }]
             });
             await createNewCartItem.save();
-            res.json({ isError: false, message: "New item added to cart", total_items: createNewCartItem.products.length });
+            const total_items = await getTotalItemsInCart(req.user._id)
+            res.json({ isError: false, message: "New item added to cart", total_items });
         } else {
 
            const updatedCartItem = await cartSchema.cart.findOneAndUpdate(
@@ -33,7 +39,8 @@ const addtoCart = async (req, res) => {
                 { $inc: { 'products.$.demanded_quantity': Number(quantity) } },
                 { new: true }
             );
-            res.json({ isError: false, message: "Cart item updated", total_items: updatedCartItem.products.length });
+            const total_items = await getTotalItemsInCart(req.user._id)
+            res.json({ isError: false, message: "Cart item updated", total_items });
         }
         
     } catch (error) {
@@ -55,7 +62,7 @@ const removeCartItem = async (req, res) => {
                 if(result.products.length === 1){
                     const deleteCart = await cartSchema.cart.deleteOne({ _id: new mongoose.Types.ObjectId(result._id) })
                     if(deleteCart.deletedCount > 0){
-                        res.json({ isError: false, message: "Cart deleted successfully" })
+                        res.json({ isError: false, message: "Cart deleted successfully", total_items: 0 })
                     }
                 }else{
                     // remove specific cart item when there are multiple items in cart
@@ -65,7 +72,8 @@ const removeCartItem = async (req, res) => {
                     if(index > -1){
                         result.products.splice(index, 1);
                         const response = await result.save();
-                        res.json({ isError: false, message: "Cart item removed successfully", payload: response })
+                        const total_items = await getTotalItemsInCart(req.user._id)
+                        res.json({ isError: false, message: "Cart item removed successfully", total_items })
                     }
                 }
             }else{
