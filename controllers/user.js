@@ -2,14 +2,14 @@ require("dotenv").config();
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 const mongoose = require("mongoose")
-const userSchema = require("../modals/user")
+const userSchema = require("../model/user")
 const salt = 10
 
 const userRegistration = async (req, res) => {
     try {
-        const {error, value} = userSchema.validateRegistrationForm(req.body)
-        if(error){
-            return res.json({isError: true, message: error.details[0].message.replace(/"/g, "")})
+        const { error, value } = userSchema.validateRegistrationForm(req.body)
+        if (error) {
+            return res.json({ isError: true, message: error.details[0].message.replace(/"/g, "") })
         }
         const hashedPassword = await bcrypt.hash(value.password, salt)
 
@@ -21,99 +21,99 @@ const userRegistration = async (req, res) => {
         })
 
         await user.save()
-        res.json({ isError: false, message: "User Registration Successful!", payload: user})
+        res.json({ isError: false, message: "User Registration Successful!", payload: user })
 
     } catch (error) {
-        res.json({isError: true, message: "Internal server error"})
+        res.json({ isError: true, message: "Internal server error" })
     }
 }
 
 const userLogin = async (req, res) => {
     try {
-        const {error, value} = userSchema.validateLoginForm(req.body)
-        if(error){
-            return res.json({isError: true, message: error.details[0].message.replace(/"/g, "")})
+        const { error, value } = userSchema.validateLoginForm(req.body)
+        if (error) {
+            return res.json({ isError: true, message: error.details[0].message.replace(/"/g, "") })
         }
-        const user = await userSchema.User.findOne({email: value.email})
+        const user = await userSchema.User.findOne({ email: value.email })
 
-        if(!user){
-            return res.json({ isError: true, message: "User not found!"})
+        if (!user) {
+            return res.json({ isError: true, message: "User not found!" })
         }
         const isMatch = await bcrypt.compare(value.password, user.password)
 
-        if(!isMatch){
-            return res.json({ isError: true, message: "Incorrect email or password!"})
+        if (!isMatch) {
+            return res.json({ isError: true, message: "Incorrect email or password!" })
         }
 
-        const token = jwt.sign({_id: user._id}, process.env.ACCESS_TOKEN, {expiresIn: "24h"})
+        const token = jwt.sign({ _id: user._id, user_role: user.user_role }, process.env.ACCESS_TOKEN, { expiresIn: "24h" })
         req.user = token
         res.json({ isError: false, message: "Login Successful!", user_role: user.user_role, payload: token })
 
     } catch (error) {
-        res.json({isError: true, message: "Internal server error"})
+        res.json({ isError: true, message: "Internal server error" })
     }
 }
 
 
-const  userLogout = async (req, res) => {
+const userLogout = async (req, res) => {
     try {
         res.clearCookie('token');
         res.json({ isError: false, message: "Successful" })
     } catch (error) {
-        res.json({ isError: true, message: "Internal server error" })  
+        res.json({ isError: true, message: "Internal server error" })
     }
 }
 
 
-const updateProfile = async(req, res) => {
+const updateProfile = async (req, res) => {
     try {
-        const {error, value} = userSchema.validateUpdateForm(req.body)
-        if(error){
-            return res.json({ isError: true, message: error.details[0].message.replace(/"/g, "")})
+        const { error, value } = userSchema.validateUpdateForm(req.body)
+        if (error) {
+            return res.json({ isError: true, message: error.details[0].message.replace(/"/g, "") })
         }
 
-        const emailInUseByAnotherUser = await userSchema.User.findOne({ 
+        const emailInUseByAnotherUser = await userSchema.User.findOne({
             email: value.email,
-            _id: { $ne: new mongoose.Types.ObjectId(req.user._id) } 
+            _id: { $ne: new mongoose.Types.ObjectId(req.user._id) }
         });
-        
+
         if (emailInUseByAnotherUser) {
             return res.json({ isError: true, message: 'Email already in use!' });
         }
 
         const user = await userSchema.User.findOneAndUpdate({
-            _id: new mongoose.Types.ObjectId(req.user._id), 
+            _id: new mongoose.Types.ObjectId(req.user._id),
         },
-        {
-            firstname: value.firstname.toLowerCase().trim(),
-            lastname: value.lastname.toLowerCase().trim(),
-            email: value.email,
-        })
-        res.json({ isError: false, message: "Profile updated successfully!", payload: user})
+            {
+                firstname: value.firstname.toLowerCase().trim(),
+                lastname: value.lastname.toLowerCase().trim(),
+                email: value.email,
+            })
+        res.json({ isError: false, message: "Profile updated successfully!", payload: user })
     } catch (error) {
-        res.json({isError: true, message: error.message})
+        res.json({ isError: true, message: error.message })
     }
 }
 
 const getUserProfile = async (req, res) => {
     try {
-        if(req.user){
+        if (req.user) {
             const user = await userSchema.User.findById(req.user._id)
-            if(!user){
-                return res.json({ isError: true, message: "User not found!"})
+            if (!user) {
+                return res.json({ isError: true, message: "User not found!" })
             }
-            res.json({ isError: false, message: "", payload: user})
+            res.json({ isError: false, message: "", payload: user })
         }
     } catch (error) {
-        res.json({isError: true, message: "Internal server error"})
+        res.json({ isError: true, message: "Internal server error" })
     }
 }
 
 const createAddress = async (req, res) => {
     try {
-        const {error, value} = userSchema.validateAddressForm(req.body)
-        if(error){
-            return res.json({ isError: true, message: error.details[0].message.replace(/"/g, "")})
+        const { error, value } = userSchema.validateAddressForm(req.body)
+        if (error) {
+            return res.json({ isError: true, message: error.details[0].message.replace(/"/g, "") })
         }
         const response = await userSchema.User.findById(req.user._id);
 
@@ -136,14 +136,14 @@ const createAddress = async (req, res) => {
 
         res.json({ isError: false, message: "Address added successfully!", payload: user.addresses })
     } catch (error) {
-        res.json({isError: true, message: "Internal server error"})
+        res.json({ isError: true, message: "Internal server error" })
     }
 }
 
 const deleteAddress = async (req, res) => {
     try {
         const address_id = req.params.id
-        if(address_id){
+        if (address_id) {
             const result = await userSchema.User.findOneAndUpdate(
                 { _id: req.user._id },
                 { $pull: { addresses: { _id: address_id } } },
@@ -153,7 +153,7 @@ const deleteAddress = async (req, res) => {
             if (!result) {
                 return res.status(404).json({ isError: true, message: "Address not found!" });
             }
-            
+
             res.json({ isError: false, message: "Address deleted", payload: result.addresses })
         }
     } catch (error) {

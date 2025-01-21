@@ -7,7 +7,7 @@ const Jwt = (req, res, next) => {
   if (!token) {
     return res.json({
       isError: true,
-      message: "Access denied. No token provided.",
+      message: "Access denied, please login and try again!",
     });
   }
 

@@ -15,7 +15,7 @@ const user = new Schema(
       country: { type: String, required: true },
       phone: { type: String }
     }],
-    user_role: {type: String, default: "user"}
+    user_role: { type: String, default: "user" }
   },
   { timestamps: true }
 );
