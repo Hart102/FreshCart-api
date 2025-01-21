@@ -44,7 +44,7 @@ function generateSwaggerSpec(app) {
   return {
     openapi: "3.0.0",
     info: {
-      title: "FreshCart API Documentation",
+      title: "FreshCart API Documentation. NodeJs(Express)",
       version: "1.0.0",
       description: "Ecommerce API built with Express",
     },
